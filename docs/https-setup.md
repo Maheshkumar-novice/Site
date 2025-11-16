@@ -1,159 +1,63 @@
-# HTTPS Setup Guide for maheshkumar.blog
+# HTTPS Setup Guide
 
-This guide explains how to configure HTTPS for your static website using Let's Encrypt and Certbot on an Ubuntu DigitalOcean droplet.
-
----
-
-## Overview
-
-HTTPS (Hypertext Transfer Protocol Secure) is essential for modern websites. It provides:
-
-- **Encryption**: Protects data transmitted between your server and visitors
-- **Authentication**: Verifies that visitors are connecting to the legitimate server
-- **Trust**: Browsers display security indicators (padlock icon) for HTTPS sites
-- **SEO Benefits**: Search engines prefer HTTPS websites
-
-Without HTTPS, browsers may display warnings that can deter visitors from accessing your site.
+Quick guide to enable HTTPS with Let's Encrypt and Certbot.
 
 ---
 
 ## Prerequisites
 
-Before setting up HTTPS, ensure you have:
-
-1. **A registered domain name**: In this case, `maheshkumar.blog`
-2. **A DigitalOcean droplet** (or similar VPS) running Ubuntu
-3. **DNS configured**: Your domain must point to your server's IP address
-4. **Nginx installed**: Web server must be running and properly configured
-5. **SSH access**: Ability to run commands on your server
+- Nginx installed and running
+- Domain DNS records pointing to your server IP
+- Ports 80 and 443 open in firewall
 
 ---
 
 ## DNS Configuration
 
-Your domain's DNS records must point to your server before Certbot can issue certificates.
+Your domain must point to your server before Certbot can issue certificates.
 
-### Required DNS Records
+Add these A records at your domain registrar:
 
-Configure the following A records with your domain registrar:
+| Type | Name | Value |
+|------|------|-------|
+| A | @ | your-server-ip |
+| A | www | your-server-ip |
 
-| Type | Name | Value | TTL |
-|------|------|-------|-----|
-| A | @ | xxx.yyy.zzz.aaa | 3600 |
-| A | www | xxx.yyy.zzz.aaa | 3600 |
-
-**PLACEHOLDER**: Replace `xxx.yyy.zzz.aaa` with your actual DigitalOcean droplet IPv4 address.
-
-### Verification
-
-Before proceeding, verify DNS propagation:
-
+Verify DNS is working:
 ```bash
-# Check non-www domain
 dig maheshkumar.blog +short
-
-# Check www subdomain
 dig www.maheshkumar.blog +short
 ```
 
-Both should return your server's IP address. DNS propagation can take up to 48 hours, but typically completes within minutes to a few hours.
+Both should return your server's IP address.
 
 ---
 
-## What is Let's Encrypt and Certbot?
-
-### Let's Encrypt
-
-**Let's Encrypt** is a free, automated, and open Certificate Authority (CA) that provides SSL/TLS certificates. Key features:
-
-- Completely free
-- Certificates valid for 90 days
-- Automated renewal
-- Trusted by all major browsers
-- No registration or hidden fees
-
-### Certbot
-
-**Certbot** is an automated tool that:
-
-- Communicates with Let's Encrypt servers
-- Verifies domain ownership
-- Generates and installs SSL certificates
-- Configures web servers automatically
-- Sets up automatic certificate renewal
-
-Together, they make HTTPS setup straightforward and maintainable.
-
----
-
-## Certificate Lifecycle
-
-Understanding how SSL certificates work helps you maintain your site:
-
-### Issuance Process
-
-1. **Domain Verification**: Certbot places a temporary file on your server
-2. **Let's Encrypt Validation**: Their servers check that file to verify domain ownership
-3. **Certificate Generation**: Upon successful verification, certificates are issued
-4. **Installation**: Certbot installs certificates and updates Nginx configuration
-
-### Certificate Validity
-
-- Certificates are valid for **90 days**
-- Let's Encrypt recommends renewal every **60 days**
-- Certbot sets up automatic renewal via systemd timer
-- Renewal happens automatically without manual intervention
-
-### Storage Location
-
-Certificates are stored in:
-```
-/etc/letsencrypt/live/maheshkumar.blog/
- fullchain.pem    (certificate + chain)
- privkey.pem      (private key)
- cert.pem         (certificate only)
- chain.pem        (chain only)
-```
-
-**Never share or commit `privkey.pem`** - it's your private key and must remain secret.
-
----
-
-## Installing Certbot on Ubuntu
-
-Certbot is available in Ubuntu's package repository. Install it with the Nginx plugin.
-
-### Update Package Lists
+## Install Certbot
 
 ```bash
 sudo apt update
-```
-
-### Install Certbot and Nginx Plugin
-
-```bash
 sudo apt install certbot python3-certbot-nginx -y
 ```
 
-The `python3-certbot-nginx` package provides automatic Nginx configuration capabilities.
-
-### Verify Installation
-
+Verify installation:
 ```bash
 certbot --version
 ```
 
-You should see output like `certbot 1.21.0` or similar, confirming successful installation.
-
 ---
 
-## Running Certbot for Nginx
+## Run Certbot
 
-Certbot can automatically configure HTTPS for your Nginx server.
+### If You Have a Site Config Already
 
-### Interactive Certificate Generation
+If you followed the nginx-setup guide and have a site config at `/etc/nginx/sites-enabled/maheshkumar.blog`:
 
-Run Certbot with the Nginx plugin:
+```bash
+sudo certbot --nginx -d maheshkumar.blog -d www.maheshkumar.blog
+```
+
+### If Using the Default Site
 
 ```bash
 sudo certbot --nginx -d maheshkumar.blog -d www.maheshkumar.blog
@@ -161,155 +65,116 @@ sudo certbot --nginx -d maheshkumar.blog -d www.maheshkumar.blog
 
 ### What Certbot Will Ask
 
-During the interactive process, Certbot will prompt for:
+1. **Email address**: Enter your real email (for renewal notifications)
+   - Example: `your-email@example.com`
 
-1. **Email Address**:
-   - **Prompt**: "Enter email address (used for urgent renewal and security notices)"
-   - **Example**: Use a real email like `placeholder@example.com`
-   - **Purpose**: Notifications about certificate expiration or security issues
+2. **Terms of Service**: Type `Y` to agree
 
-2. **Terms of Service**:
-   - **Prompt**: "Please read the Terms of Service..."
-   - **Response**: Type `Y` to agree
+3. **EFF Email List**: Type `Y` or `N` (your choice)
 
-3. **EFF Email List** (optional):
-   - **Prompt**: "Would you be willing to share your email..."
-   - **Response**: `Y` or `N` (your choice)
-
-4. **Redirect HTTP to HTTPS**:
-   - **Prompt**: "Please choose whether or not to redirect HTTP traffic to HTTPS"
-   - **Response**: Choose `2` (redirect) - this is recommended for security
+4. **Redirect HTTP to HTTPS**: Choose `2` (redirect) - **recommended**
 
 ### What Certbot Does
 
-Upon successful completion, Certbot will:
-
-- Verify domain ownership via HTTP challenge
-- Generate SSL certificates
-- Modify your Nginx configuration to use HTTPS
-- Set up redirects from HTTP to HTTPS (if selected)
-- Configure certificate renewal
-
-### Expected Output
-
-```
-Congratulations! You have successfully enabled HTTPS on https://maheshkumar.blog and https://www.maheshkumar.blog
-```
+- Verifies you control the domain
+- Generates SSL certificates
+- Updates your Nginx config automatically
+- Sets up auto-renewal
 
 ---
 
-## Automatic Certificate Renewal
+## Verify HTTPS Works
 
-Let's Encrypt certificates expire after 90 days. Certbot automatically sets up renewal.
-
-### Renewal Timer
-
-Certbot installation includes a systemd timer that runs twice daily to check for expiring certificates.
-
-Check the renewal timer status:
-
+Test your site:
 ```bash
-sudo systemctl status certbot.timer
+curl -I https://maheshkumar.blog
 ```
 
-### Test Renewal Process
+Open in browser: `https://maheshkumar.blog`
 
-Perform a dry run to verify renewal will work without actually renewing:
+You should see the padlock icon in the address bar.
+
+---
+
+## Certificate Auto-Renewal
+
+Certbot automatically sets up renewal. Certificates renew every 60 days.
+
+### Test Renewal
 
 ```bash
 sudo certbot renew --dry-run
 ```
 
-If the dry run succeeds, you'll see:
+If successful, you'll see: `Congratulations, all simulated renewals succeeded`
 
-```
-Congratulations, all simulated renewals succeeded
-```
-
-### Manual Renewal (if needed)
-
-To manually renew certificates before expiration:
-
-```bash
-sudo certbot renew
-```
-
-Nginx will automatically reload after successful renewal.
-
-### Verify Renewal Schedule
-
-Check when certificates were last renewed and when they'll expire:
+### Check Certificate Status
 
 ```bash
 sudo certbot certificates
 ```
 
-This displays certificate details including expiration dates.
+Shows certificate expiration dates.
 
 ---
 
-## Troubleshooting
+## Common Issues
 
-### Common Errors and Solutions
+**"Failed authorization procedure" / "Connection refused"**
+- DNS not pointing to your server yet. Wait for propagation.
+- Port 80 is blocked. Check: `sudo ufw allow 80/tcp`
 
-#### Error: "Port 80 is already in use"
+**"Certificate already exists"**
+- Certificate was already generated. To regenerate:
+  ```bash
+  sudo certbot --nginx -d maheshkumar.blog -d www.maheshkumar.blog --force-renewal
+  ```
 
-**Cause**: Another service is using port 80.
+**Site works on HTTP but not HTTPS**
+- Firewall blocking port 443: `sudo ufw allow 443/tcp`
+- Nginx not reloaded: `sudo systemctl reload nginx`
 
-**Solution**:
+**"Too many certificates already issued"**
+- Let's Encrypt rate limit (5 per week). Wait or use staging: `--staging`
+
+---
+
+## After Certbot Succeeds
+
+If you want to use the full config from this repository (with custom security headers and redirects):
+
 ```bash
-# Check what's using port 80
-sudo lsof -i :80
+# Replace the config Certbot modified
+sudo cp server/nginx.conf /etc/nginx/sites-available/maheshkumar.blog
 
-# If it's Nginx, reload instead of restart
+# Test and reload
+sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-#### Error: "Failed authorization procedure"
+The repository's `server/nginx.conf` includes:
+- HTTP → HTTPS redirect
+- www → non-www redirect
+- Security headers
+- Modern SSL settings
 
-**Cause**: DNS records don't point to your server, or firewall blocks port 80.
+---
 
-**Solutions**:
-- Verify DNS with `dig maheshkumar.blog +short`
-- Check firewall: `sudo ufw status`
-- Ensure port 80 is open: `sudo ufw allow 80/tcp`
+## Testing Your SSL Configuration
 
-#### Error: "Certificate already exists"
-
-**Cause**: Certificate was previously generated.
-
-**Solution**: Use `--force-renewal` to regenerate:
-```bash
-sudo certbot --nginx -d maheshkumar.blog -d www.maheshkumar.blog --force-renewal
-```
-
-### Certificate Logs
-
-View detailed logs if issues occur:
-
-```bash
-sudo tail -f /var/log/letsencrypt/letsencrypt.log
-```
-
-### Testing HTTPS Configuration
-
-After setup, test your HTTPS configuration:
-
-1. Visit `https://maheshkumar.blog` in a browser
-2. Check for the padlock icon in the address bar
-3. Use SSL testing tools: [SSL Labs Server Test](https://www.ssllabs.com/ssltest/)
+Check your SSL setup quality:
+- Visit: https://www.ssllabs.com/ssltest/
+- Enter your domain
+- Should get an "A" or "A+" rating
 
 ---
 
 ## Summary
 
-You have now configured HTTPS for your website using Let's Encrypt and Certbot. Your site is secure with:
+Your site now has:
+- ✓ Free SSL certificate from Let's Encrypt
+- ✓ HTTPS enabled (padlock in browser)
+- ✓ Auto-renewal configured
+- ✓ HTTP traffic redirected to HTTPS
 
-- Automatic HTTPS for all traffic
-- Redirect from HTTP to HTTPS
-- Redirect from www to non-www
-- Automatic certificate renewal every 60 days
-
-Remember to keep your system updated and monitor certificate expiration via the email you provided during setup.
-
----
+Certificates renew automatically every 60 days. You'll get email notifications if renewal fails.
