@@ -1,0 +1,101 @@
+/* CSS Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styling and Centering */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #ffffff;
+    color: #333333;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Main Container */
+main {
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Typography */
+body {
+    line-height: 1.6;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 3rem;
+}
+
+/* Navigation and Links */
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav li {
+    margin-bottom: 1.5rem;
+}
+
+nav a {
+    color: #0000EE;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+nav a:visited {
+    color: #551A8B;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    nav a {
+        font-size: 1rem;
+        word-break: break-all;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.75rem;
+        margin-bottom: 2rem;
+    }
+
+    nav li {
+        margin-bottom: 1.2rem;
+    }
+
+    nav a {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 320px) {
+    h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    nav li {
+        margin-bottom: 1rem;
+    }
+
+    nav a {
+        font-size: 0.9rem;
+    }
+}
