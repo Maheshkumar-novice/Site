@@ -1,101 +1,177 @@
-/* CSS Reset and Base Styles */
+/* CSS Reset and Variables */
+:root {
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --accent-color: #c5a059;
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
+    --transition-speed: 0.4s;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Body Styling and Centering */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: #ffffff;
-    color: #333333;
+    font-family: var(--font-sans);
+    background-color: var(--bg-color);
+    color: var(--text-color);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-/* Main Container */
-main {
-    text-align: center;
-    padding: 1rem;
-}
-
-/* Typography */
-body {
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
-h1 {
-    font-size: 2.5rem;
-    font-weight: 600;
-    margin-bottom: 3rem;
+/* Layout */
+.content-wrapper {
+    width: 100%;
+    max-width: 800px;
+    padding: 2rem;
+    text-align: center;
 }
 
-/* Navigation and Links */
+/* Typography & Hero */
+.hero {
+    margin-bottom: 4rem;
+}
+
+.name {
+    font-family: var(--font-serif);
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.tagline {
+    font-size: 1.1rem;
+    font-weight: 400;
+    opacity: 0.8;
+    letter-spacing: 0.05em;
+}
+
+/* Navigation Links */
 nav ul {
     list-style: none;
-    padding: 0;
-}
-
-nav li {
-    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
 }
 
 nav a {
-    color: #0000EE;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 280px;
+    padding: 1rem 1.5rem;
     text-decoration: none;
-    font-size: 1.1rem;
+    color: var(--text-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    transition: transform var(--transition-speed) ease, border-color var(--transition-speed) ease;
+    background: rgba(255, 255, 255, 0.02);
+    position: relative;
+    overflow: hidden;
+}
+
+nav a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(197, 160, 89, 0.15), transparent 100px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+nav a:hover::before {
+    opacity: 1;
 }
 
 nav a:hover {
-    text-decoration: underline;
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
 }
 
-nav a:visited {
-    color: #551A8B;
+.link-text {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+}
+
+.link-arrow {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all var(--transition-speed) ease;
+    color: var(--accent-color);
+}
+
+nav a:hover .link-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Footer */
+footer {
+    margin-top: 5rem;
+    font-size: 0.8rem;
+    opacity: 0.4;
+}
+
+/* Animations */
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.delay-1 {
+    animation-delay: 0.2s;
+}
+
+.delay-2 {
+    animation-delay: 0.4s;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    h1 {
-        font-size: 2rem;
-        margin-bottom: 2.5rem;
+    .name {
+        font-size: 3rem;
     }
 
     nav a {
-        font-size: 1rem;
-        word-break: break-all;
+        width: 100%;
+        max-width: 300px;
     }
 }
 
 @media (max-width: 480px) {
-    h1 {
-        font-size: 1.75rem;
-        margin-bottom: 2rem;
+    .name {
+        font-size: 2.5rem;
     }
 
-    nav li {
-        margin-bottom: 1.2rem;
+    .tagline {
+        font-size: 1rem;
     }
 
-    nav a {
-        font-size: 0.95rem;
-    }
-}
-
-@media (max-width: 320px) {
-    h1 {
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    nav li {
-        margin-bottom: 1rem;
-    }
-
-    nav a {
-        font-size: 0.9rem;
+    .content-wrapper {
+        padding: 1.5rem;
     }
 }
